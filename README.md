@@ -1,5 +1,5 @@
 # BvChen
-
+[![R-CMD-check](https://github.com/MukulBijalwan/BvChen/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/MukulBijalwan/BvChen/actions/workflows/R-CMD-check.yaml)
 The **BvChen** package provides the density, distribution function,
 survival function, random generation, marginal and conditional
 distributions, dependence measures, moments, EM-based maximum
