@@ -1,0 +1,49 @@
+Package: BvChen
+Type: Package
+Title: Bivariate Chen Distribution: Properties, Estimation, and
+    Applications
+Version: 0.1.0
+Authors@R: c(
+    person("Mukul", "Bijalwan", role = c("aut", "cre"),
+           email = "mukulbijalwan555@gmail.com",
+           comment = c(ORCID = "0009-0001-3040-6912")),
+    person("Puneet Kumar", "Gupta", role = "aut",
+           email = "puneetstat999@gmail.com")
+    )
+Description: Provides the density, cumulative distribution function,
+    survival function, random number generation, hazard rate function,
+    marginal and conditional distributions, statistical properties
+    (joint moments, variance-covariance structure, Marshall-Olkin type
+    survival copula, Kendall's tau and concordance ordering), maximum
+    likelihood estimation through the expectation-maximization
+    algorithm, Kolmogorov-Smirnov goodness-of-fit tests, Q-Q plots and
+    contour and perspective visualizations for the bivariate extension
+    of the bathtub-shaped Chen distribution of Gupta et al. (2022)
+    <doi:10.1007/s41872-022-00193-4>. The model is constructed as
+    min(Z1, Z2) of three independent latent Chen (2000)
+    <doi:10.1016/S0167-7152(00)00046-9> components through competing
+    risks, giving closed-form joint survival and conditional
+    distributions and a singular component on the diagonal. Complete
+    univariate Chen building blocks are included. Methods are based on
+    Marshall and Olkin (1967) <doi:10.1080/01621459.1967.10498898>,
+    Dempster et al. (1977) <doi:10.1111/j.2517-6161.1977.tb01600.x>,
+    and Meintanis (2007) <doi:10.1016/j.jspi.2006.09.012>.
+License: GPL (>= 2)
+Encoding: UTF-8
+LazyData: true
+ByteCompile: true
+Depends:
+    R (>= 3.5.0)
+Imports:
+    stats,
+    graphics
+Suggests:
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+VignetteBuilder: knitr
+URL: https://github.com/MukulBijalwan/BvChen
+BugReports: https://github.com/MukulBijalwan/BvChen/issues
+NeedsCompilation: no
+Config/testthat/edition: 3
+Config/roxygen2/version: 8.1.0

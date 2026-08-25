@@ -1,0 +1,12 @@
+^_roxy\.R$
+^_smoke\.R$
+^_validate\.R$
+^_debug_em\.R$
+^_check.*$
+^_val_out.*$
+^_paper\.txt$
+^manual$
+^BvChen-manual
+^cran-comments\.md$
+^.*\.Rproj$
+^\.Rproj\.user$

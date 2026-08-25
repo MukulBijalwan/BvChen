@@ -1,0 +1,64 @@
+---
+title: "Bivariate Chen Distribution: Properties, Estimation, and Applications"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Bivariate Chen Distribution: Properties, Estimation, and Applications}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+```{r setup}
+library(BvChen)
+```
+
+The bivariate Chen distribution is built from three independent Chen
+(2000) components $X_i \sim Ch(\alpha_i,\beta)$ via
+$Z_1=\min(X_0,X_1)$ and $Z_2=\min(X_0,X_2)$. The margins are
+$Z_1\sim Ch(\alpha_1+\alpha_3,\beta)$ and
+$Z_2\sim Ch(\alpha_2+\alpha_3,\beta)$, and the law carries a singular
+component on the diagonal $z_1=z_2$ with mass
+$\alpha_3/(\alpha_1+\alpha_2+\alpha_3)$.
+
+## Simulating data
+
+```{r}
+set.seed(2024)
+sim <- rbvch(400, 0.8, 1.2, 0.5, 1.5)
+head(sim)
+mean(sim[, "z1"] == sim[, "z2"])   # about 0.5 / 2.5 = 0.2
+```
+
+## Fitting with the EM algorithm
+
+```{r}
+fit <- fitbvch(sim[, "z1"], sim[, "z2"])
+fit
+coef(fit)
+```
+
+## Profile likelihood for beta
+
+```{r, fig.width=6, fig.height=4}
+pb <- profile_beta(sim[, "z1"], sim[, "z2"])
+pb$beta_hat
+with(pb$grid, plot(beta, prof_loglik, type = "l",
+                   xlab = expression(beta), ylab = "profile log-likelihood"))
+abline(v = pb$beta_hat, lty = 2, col = "red")
+```
+
+## Goodness of fit
+
+```{r}
+cf <- coef(fit)
+gofbvch(sim[, "z1"], sim[, "z2"], cf["alpha1"], cf["alpha2"],
+        cf["alpha3"], cf["beta"])
+```
+
+```{r, fig.width=7}
+qqbvch(sim[, "z1"], sim[, "z2"], cf["alpha1"], cf["alpha2"],
+       cf["alpha3"], cf["beta"])
+```

@@ -1,0 +1,12 @@
+*.tar.gz
+*.zip
+*.Rcheck/
+.Rhistory
+.RData
+_val_out*.txt
+_check_out*.txt
+_cred_*.txt
+_paper.txt
+_git.txt
+.Rproj.user/
+*.Rproj

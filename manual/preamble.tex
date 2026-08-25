@@ -1,0 +1,50 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{mathptmx}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{orcidlink}
+
+% ---- Rd.sty FIRST, so our layout below always wins -----------------
+\usepackage{Rd}
+\providecommand{\proglang}[1]{\textsf{#1}}
+\providecommand{\pkg}[1]{\textbf{#1}}
+\providecommand{\CRANpkg}[1]{\href{https://cran.r-project.org/package=#1}{\pkg{#1}}}
+
+% ---- page geometry: applied AFTER Rd.sty so it is never overridden -
+\usepackage[margin=2.6cm]{geometry}
+\usepackage[expansion=false]{microtype}
+\emergencystretch=2em
+\sloppy
+\hypersetup{hidelinks}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+
+% ---- look & feel --------------------------------------------------
+\titleformat{\section}{\Large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{1em}{}
+\setlength{\parskip}{0.4em}
+\setlength{\parindent}{0em}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\itshape The BvChen Package}
+\fancyhead[R]{\small\itshape Bivariate Chen Distribution in R}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ---- code listing style -------------------------------------------
+\lstdefinestyle{bvchex}{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  columns=fullflexible,
+  frame=single,
+  framerule=0.3pt,
+  rulecolor=\color{gray!60},
+  backgroundcolor=\color{gray!7},
+  xleftmargin=1em
+}
+\lstset{style=bvchex}
