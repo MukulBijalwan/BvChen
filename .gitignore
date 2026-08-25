@@ -11,3 +11,11 @@ _git.txt
 .Rproj.user/
 *.Rproj
 _check_final.txt
+# LaTeX / PDF manual build outputs (kept out of the source tree & CRAN tarball)
+/manual/*.aux
+/manual/*.log
+/manual/*.toc
+/manual/*.out
+/manual/*.err
+/manual/*.pdf
+/BvChen-manual.pdf

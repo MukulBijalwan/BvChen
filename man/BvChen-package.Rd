@@ -8,21 +8,11 @@
 \description{
 Density, distribution function, survival function, random variate generation, marginal and conditional distributions, dependence measures, moments, maximum-likelihood estimation via the EM algorithm and goodness-of-fit tools for the bivariate Chen distribution constructed as min(Z1, Z2) of three independent Chen (2000) components. Includes univariate Chen building blocks.
 }
-\seealso{
-Useful links:
+\details{
+Help and issue reporting are available at the URLs below.
 \itemize{
-  \item \url{https://github.com/yourname/BvChen}
-  \item Report bugs at \url{https://github.com/yourname/BvChen/issues}
+  \item \url{https://github.com/MukulBijalwan/BvChen}
+  \item Report bugs at \url{https://github.com/MukulBijalwan/BvChen/issues}
 }
-
-}
-\author{
-\strong{Maintainer}: Your Name \email{your.email@example.com}
-
-Authors:
-\itemize{
-  \item Your Name \email{your.email@example.com}
-}
-
 }
 \keyword{internal}
