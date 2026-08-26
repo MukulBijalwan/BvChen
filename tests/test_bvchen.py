@@ -50,6 +50,21 @@ class TestDensity:
             dbvch(1.0, 1.0, A1, A2, A3, B, component="bogus")
 
 
+    def test_2d_meshgrid_shape_preserved(self):
+        # regression: dbvch/pbvch/sbvch must keep the broadcasted meshgrid
+        # shape rather than collapsing to a flat 1-D buffer
+        g = np.linspace(0.05, 4.0, 32)
+        X, Y = np.meshgrid(g, g, indexing="ij")
+        for fn, comp in [(dbvch, "full"), (dbvch, "ac"), (dbvch, "sing"),
+                         (pbvch, None), (sbvch, None)]:
+            if comp is None:
+                out = fn(X, Y, A1, A2, A3, B)
+            else:
+                out = fn(X, Y, A1, A2, A3, B, component=comp)
+            assert out.shape == X.shape
+            assert np.isfinite(out).all()
+
+
 class TestCDFSurvival:
     def test_inclusion_exclusion_identity(self):
         for z1, z2 in [(1.0, 2.0), (2.0, 1.0), (1.0, 1.0)]:

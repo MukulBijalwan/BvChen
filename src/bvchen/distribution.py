@@ -103,11 +103,11 @@ def dbvch(x, y, alpha1, alpha2, alpha3, beta, log=False,
     xa = np.asarray(x, dtype=float)
     ya = np.asarray(y, dtype=float)
     scalar = xa.ndim == 0 and ya.ndim == 0
-    n = max(xa.size, ya.size)
-    x = np.broadcast_to(xa, (n,))
-    y = np.broadcast_to(ya, (n,))
+    xb, yb = np.broadcast_arrays(np.atleast_1d(xa), np.atleast_1d(ya))
+    x = xb.ravel()
+    y = yb.ravel()
 
-    val = np.zeros(n, dtype=float)
+    val = np.zeros(x.size, dtype=float)
     diag = x == y
     lo = x < y
     hi = x > y
@@ -128,7 +128,7 @@ def dbvch(x, y, alpha1, alpha2, alpha3, beta, log=False,
             val = np.log(val)
     if scalar:
         return float(val[0])
-    return val
+    return val.reshape(xb.shape)
 def sbvch(x, y, alpha1, alpha2, alpha3, beta):
     """Joint survival function :math:`P(Z_1 > x, Z_2 > y)`.
 
@@ -142,11 +142,11 @@ def sbvch(x, y, alpha1, alpha2, alpha3, beta):
     xa = np.asarray(x, dtype=float)
     ya = np.asarray(y, dtype=float)
     scalar = xa.ndim == 0 and ya.ndim == 0
-    n = max(xa.size, ya.size)
-    x = np.broadcast_to(xa, (n,))
-    y = np.broadcast_to(ya, (n,))
+    xb, yb = np.broadcast_arrays(np.atleast_1d(xa), np.atleast_1d(ya))
+    x = xb.ravel()
+    y = yb.ravel()
 
-    out = np.zeros(n, dtype=float)
+    out = np.zeros(x.size, dtype=float)
     finite = np.isfinite(x) & np.isfinite(y)
     xf = np.maximum(x[finite], 0.0)
     yf = np.maximum(y[finite], 0.0)
@@ -156,8 +156,9 @@ def sbvch(x, y, alpha1, alpha2, alpha3, beta):
                     - (alpha2 + alpha3) * upr(yf, beta)
                     + alpha3 * upr(m, beta))
     out[finite] = np.exp(exponent)
+    out = out.reshape(xb.shape)
     if scalar:
-        return float(out[0])
+        return float(out.reshape(()))
     return out
 
 
@@ -172,17 +173,17 @@ def pbvch(x, y, alpha1, alpha2, alpha3, beta):
     xa = np.asarray(x, dtype=float)
     ya = np.asarray(y, dtype=float)
     scalar = xa.ndim == 0 and ya.ndim == 0
-    n = max(xa.size, ya.size)
-    x = np.broadcast_to(xa, (n,))
-    y = np.broadcast_to(ya, (n,))
+    xb, yb = np.broadcast_arrays(np.atleast_1d(xa), np.atleast_1d(ya))
+    x = xb.ravel()
+    y = yb.ravel()
 
     s1 = np.where(x == np.inf, 0.0, schen(x, alpha1 + alpha3, beta))
     s2 = np.where(y == np.inf, 0.0, schen(y, alpha2 + alpha3, beta))
     s = np.where((x == np.inf) | (y == np.inf), 0.0,
                  sbvch(x, y, alpha1, alpha2, alpha3, beta))
-    out = np.clip(1.0 - s1 - s2 + s, 0.0, 1.0)
+    out = np.clip(1.0 - s1 - s2 + s, 0.0, 1.0).reshape(xb.shape)
     if scalar:
-        return float(out[0])
+        return float(out.reshape(()))
     return out
 
 

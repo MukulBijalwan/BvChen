@@ -1,0 +1,775 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{mathptmx}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+
+% ---- page geometry ---------------------------------------------------
+\usepackage[margin=2.6cm]{geometry}
+\usepackage{hyperref}
+\hypersetup{hidelinks}
+\usepackage{fancyhdr}
+
+% ---- look & feel -----------------------------------------------------
+\setlength{\parskip}{0.4em}
+\setlength{\parindent}{0em}
+\emergencystretch=2em
+\sloppy
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\itshape The bvchen Package}
+\fancyhead[R]{\small\itshape Bivariate Chen Distribution in Python}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ---- code listing style ----------------------------------------------
+\lstdefinestyle{bvchex}{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  columns=fullflexible,
+  frame=single,
+  framerule=0.3pt,
+  rulecolor=\color{gray!60},
+  backgroundcolor=\color{gray!7},
+  xleftmargin=1em
+}
+\lstset{style=bvchex}
+
+% ---- Rd-style documentation macros -----------------------------------
+\newcommand{\proglang}[1]{\textsf{#1}}
+\newcommand{\pypkg}[1]{\textbf{#1}}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\eqn}[2]{$#1$}
+
+% topic header:  \HeaderA{function names}{title}
+\newcommand{\HeaderA}[2]{%
+  \vspace{1.1em}\phantomsection
+  \addcontentsline{toc}{section}{\protect\numberline{}#2 \hfill{}%
+    \normalfont\texttt{\small #1}}%
+  \noindent{\Large\bfseries\ttfamily #1}\\[0.35em]
+  {\large #2}\par
+  \vspace{0.4em}\hrule\vspace{0.9em}}
+
+\newcommand{\AliasLine}[1]{%
+  \noindent{\small\bfseries Aliases: }{\small\ttfamily #1}\par\vspace{0.5em}}
+
+\newcommand{\DocSec}[1]{%
+  \vspace{0.7em}\noindent{\bfseries #1}\par\vspace{0.25em}}
+
+\begin{document}
+
+% ======================= TITLE PAGE ===============================
+\begin{titlepage}
+\centering
+\vspace*{1.5cm}
+{\Huge \bfseries The Bivariate Chen Distribution\\[0.6em]
+The \textsf{bvchen} \proglang{Python} Package\\[1.2em]}
+{\Large A toolkit for density, distribution, survival, dependence
+measures, EM-based estimation and goodness-of-fit analysis\\[2em]}
+{\large
+\textbf{Mukul Bijalwan}\textsuperscript{1} \quad and \quad
+\textbf{Puneet Kumar Gupta}\textsuperscript{2}\\[1em]}
+{\normalsize
+\textsuperscript{1}\ \texttt{mukulbijalwan555@gmail.com}\\
+\textsuperscript{2}\ \texttt{puneetstat999@gmail.com}\\[2em]}
+{\normalsize \today}
+\vspace{1.5em}
+
+\begin{minipage}{0.88\textwidth}
+\begin{abstract}
+\noindent
+This manual documents the \pypkg{bvchen} package, a \proglang{Python}
+implementation of the bivariate extension of the bathtub-shaped Chen
+distribution proposed by Gupta, Pundir, Sharma and Mesfioui (2022,
+\emph{Life Cycle Reliability and Safety Engineering} 11:247--259),
+constructed from three independent latent Chen (2000) components
+through competing risks. The package provides the joint density,
+distribution and survival functions (including the singular component
+on the diagonal), random variate generation, marginal and conditional
+distributions, a Marshall--Olkin type survival copula with Kendall's
+$\tau$, joint moments, maximum-likelihood estimation via the EM
+algorithm, Kolmogorov--Smirnov goodness-of-fit tests and Q--Q
+diagnostics. Every documented function is illustrated with executable
+examples whose live output appears directly beneath the code in this
+document.
+\end{abstract}
+\end{minipage}
+
+\vspace{1em}
+{\small \textbf{Keywords:} Chen distribution; bivariate lifetime
+model; Marshall--Olkin structure; competing risks; EM algorithm;
+survival copula; \proglang{Python}.}
+
+\vspace{1em}
+{\footnotesize Generated automatically from the docstrings of version
+0.1.0; all examples were executed while compiling this manual.}
+\vspace*{\fill}
+\end{titlepage}
+
+% ======================= TOC =======================================
+\tableofcontents
+\newpage
+
+% ======================= THEORY ====================================
+\section{The univariate Chen distribution}
+The two-parameter Chen (2000) distribution has survival function
+\begin{equation}
+S(x)=\exp\{-\alpha(e^{x^{\beta}}-1)\}, \qquad x>0,
+\; \alpha,\beta>0,
+\label{eq:chen}
+\end{equation}
+hazard rate $h(x)=\alpha\beta x^{\beta-1}e^{x^{\beta}}$
+(bathtub-shaped or increasing) and quantile function
+$x_p=[\ln\{1-\ln(1-p)/\alpha\}]^{1/\beta}$.
+
+\section{The bivariate construction}
+Let $X_0,X_1,X_2$ be independent with $X_i \sim Ch(\alpha_i,\beta)$
+and set $Z_1=\min(X_0,X_1)$, $Z_2=\min(X_0,X_2)$. Then
+$Z_1 \sim Ch(\alpha_1+\alpha_3,\beta)$ and
+$Z_2 \sim Ch(\alpha_2+\alpha_3,\beta)$ marginally. The joint law is a
+mixture: an absolutely continuous part on $\{z_1<z_2\}$ and
+$\{z_1>z_2\}$ carrying total mass
+$(\alpha_1+\alpha_2)/(\alpha_1+\alpha_2+\alpha_3)$, and a singular
+component on the diagonal $z_1=z_2$ of mass
+$\alpha_3/(\alpha_1+\alpha_2+\alpha_3)$.
+
+\subsection{Joint survival}
+With $t(z)=e^{z^{\beta}}-1$,
+\begin{equation}
+S(z_1,z_2)=\exp\{-(\alpha_1+\alpha_3)t(z_1)-(\alpha_2+\alpha_3)t(z_2)
++\alpha_3 t(\min(z_1,z_2))\}.
+\label{eq:surv}
+\end{equation}
+
+\subsection{Survival copula}
+In terms of marginal survival levels $u=S_1(z_1)$, $v=S_2(z_2)$,
+\begin{equation}
+\hat C(u,v)=\min\Bigl\{v\,u^{\frac{\alpha_1}{\alpha_1+\alpha_3}},\;
+u\,v^{\frac{\alpha_2}{\alpha_2+\alpha_3}}\Bigr\},
+\label{eq:cop}
+\end{equation}
+a Marshall--Olkin type copula whose dependence increases with the
+relative size of the common-shock parameter $\alpha_3$ and is free
+of $\beta$.
+
+\subsection{Estimation by the EM algorithm}
+On the exponential scale $t_i=e^{z_i^{\beta}}-1$ the latent model
+reduces to a Marshall--Olkin competing-risks scheme. The package
+alternates a numerical M-step maximising the observed log-likelihood
+in $(\alpha_1,\alpha_2,\alpha_3)$ at fixed $\beta$ with a
+one-dimensional update of $\beta$; observed ties $z_{1i}=z_{2i}$
+identify the common shock exactly.
+
+\newpage
+
+% ==================== FUNCTION DOCUMENTATION =======
+\addcontentsline{toc}{section}{Function documentation}
+\begin{center}{\Large\bfseries Function documentation}\end{center}
+\vspace{0.5em}
+\HeaderA{dchen pchen schen qchen rchen hchen fit\_chen chen\_moment}{The Univariate Chen Distribution}
+\AliasLine{dchen, pchen, schen, qchen, rchen, hchen, fit\_chen, chen\_moment}
+\DocSec{Description}
+Density (\code{dchen}), distribution function
+(\code{pchen}), survival function (\code{schen}), quantile function
+(\code{qchen}), random generation (\code{rchen}) and hazard rate
+(\code{hchen}) for the Chen (2000) distribution with scale parameter
+\eqn{\alpha}{} and power parameter \eqn{\beta}{};
+maximum-likelihood fitting (\code{fit\_chen}) and raw moments
+(\code{chen\_moment}).
+\DocSec{Usage}
+\begin{verbatim}
+dchen(x, alpha, beta, log=False)
+pchen(q, alpha, beta)
+schen(q, alpha, beta)
+qchen(p, alpha, beta)
+rchen(n, alpha, beta, random_state=None)
+hchen(x, alpha, beta)
+fit_chen(x, start=None, tol=1e-08, maxit=100)
+chen_moment(k, alpha, beta, tol=1e-09)
+\end{verbatim}
+\DocSec{Arguments}
+\begin{description}
+\item[\code{x, q}] array\_like of non-negative quantiles.
+\item[\code{p}] array\_like of probabilities in $[0,1]$.
+\item[\code{alpha, beta}] positive scale and power parameters ($\alpha,\beta>0$).
+\item[\code{log}] bool; if \code{True} the log-density is returned.
+\item[\code{n}] int; number of variates for \code{rchen}.
+\item[\code{random\_state}] int or Generator; reproducibility seed.
+\item[\code{start}] optional tuple/dict of starting values for \code{fit\_chen}.
+\item[\code{k}] non-negative moment order for \code{chen\_moment}.
+\end{description}
+\DocSec{Details}
+The survival follows equation~(\ref{eq:chen});
+the hazard is bathtub-shaped for $\beta<1$ and increasing for
+$\beta\ge 1$. Random variates exploit that
+$U=e^{X^{\beta}}-1\sim Exp(\alpha)$, i.e.\
+$X=\{\ln(1+U)\}^{1/\beta}$.
+\DocSec{Value}
+\begin{description}
+\item[\code{dchen}] ndarray of density values (or log-density).
+\item[\code{pchen, schen}] ndarray of probabilities.
+\item[\code{qchen}] ndarray of quantiles.
+\item[\code{rchen}] ndarray of size \code{n}.
+\item[\code{hchen}] ndarray of hazard rates.
+\item[\code{fit\_chen}] dict with keys \code{alpha}, \code{beta}, \code{loglik}, \code{converged}, \code{se}.
+\item[\code{chen\_moment}] float, $E[X^k]$.
+\end{description}
+\DocSec{References}
+Chen, Z. (2000). A new two-parameter lifetime
+distribution with bathtub shape or increasing failure rate function.
+\emph{Statistics \& Probability Letters} 49, 155--161.
+
+\vspace{0.8em}\noindent{\bfseries Examples} (live output):
+\begin{lstlisting}
+> from bvchen import (dchen, pchen, schen, qchen, rchen,
+>                     hchen, fit_chen)
+> dchen([0.5, 1.0, 2.0], alpha=2.0, beta=1.5)
+array([1.29350301e+00, 2.62382644e-01, 1.06927063e-12])
+> pchen(1.0, alpha=2.0, beta=1.5)
+np.float64(0.9678249398783226)
+> schen(1.0, alpha=2.0, beta=1.5)
+np.float64(0.0321750601216774)
+> qchen([0.25, 0.5, 0.75], alpha=2.0, beta=1.5)
+array([0.26237078, 0.44571053, 0.65210051])
+> hchen(0.5, alpha=2.0, beta=1.5)
+np.float64(3.0210126476752177)
+> x = rchen(500, alpha=2.0, beta=1.5, random_state=42)
+> fit = fit_chen(x)
+> (round(fit["alpha"], 3), round(fit["beta"], 3),
+>  round(fit["loglik"], 2))
+(2.033, 1.537, -9.18)
+\end{lstlisting}
+
+\HeaderA{dbvch pbvch sbvch rbvch}{The Bivariate Chen Distribution}
+\AliasLine{dbvch, pbvch, sbvch, rbvch}
+\DocSec{Description}
+Density (\code{dbvch}), joint CDF (\code{pbvch}),
+joint survival function (\code{sbvch}) and random generation
+(\code{rbvch}) for the bivariate Chen distribution built from three
+independent latent Chen components: $Z_1=\min(X_0,X_1)$,
+$Z_2=\min(X_0,X_2)$ with $X_i \sim Ch(\alpha_i,\beta)$.
+\DocSec{Usage}
+\begin{verbatim}
+dbvch(x, y, alpha1, alpha2, alpha3, beta,
+     log=False, component="full")
+sbvch(x, y, alpha1, alpha2, alpha3, beta)
+pbvch(x, y, alpha1, alpha2, alpha3, beta)
+rbvch(n, alpha1, alpha2, alpha3, beta, random_state=None)
+\end{verbatim}
+\DocSec{Arguments}
+\begin{description}
+\item[\code{x, y}] array\_like of non-negative quantiles.
+\item[\code{alpha1, alpha2, alpha3}] positive shape parameters; \code{alpha3} is the common-shock parameter driving the diagonal ties.
+\item[\code{beta}] positive common power parameter.
+\item[\code{log}] bool; if \code{True} the log-density is returned.
+\item[\code{component}] \code{"full"} (default), \code{"ac"} (absolutely continuous part only) or \code{"sing"} (diagonal singular density only).
+\item[\code{n}] int; number of observations for \code{rbvch}.
+\end{description}
+\DocSec{Details}
+On $\{z_1<z_2\}$ the density factorises as
+$f_{Ch(\alpha_1)}(z_1)\,f_{Ch(\alpha_2+\alpha_3)}(z_2)$ (symmetrically
+on $\{z_1>z_2\}$); the diagonal carries the singular component of mass
+$\alpha_3/(\alpha_1+\alpha_2+\alpha_3)$ with density
+$g(z)=\alpha_3 t'(z)\exp\{-A\,t(z)\}$, $A=\alpha_1+\alpha_2+\alpha_3$.
+The CDF uses the inclusion--exclusion identity $F=1-S_1-S_2+S$, valid
+also in the presence of the singular part.
+\DocSec{Value}
+\begin{description}
+\item[\code{dbvch}] float or ndarray of joint density values.
+\item[\code{pbvch}] $P(Z_1\le x,\, Z_2\le y)$.
+\item[\code{sbvch}] $P(Z_1>x,\, Z_2>y)$.
+\item[\code{rbvch}] ndarray of shape \code{(n, 2)}, columns \code{z1}, \code{z2}.
+\end{description}
+\DocSec{References}
+Gupta, P.~K., Pundir, P.~S., Sharma, V.~K.,
+Mesfioui, M. (2022). Bivariate extension of bathtub-shaped
+distribution. \emph{Life Cycle Reliability and Safety Engineering}
+11, 247--259.
+
+\vspace{0.8em}\noindent{\bfseries Examples} (live output):
+\begin{lstlisting}
+> from bvchen import dbvch, pbvch, sbvch, rbvch
+> dbvch(0.5, 1.5, 0.8, 1.2, 0.5, 1.5)
+0.0021391356406158728
+> dbvch(1.5, 0.5, 0.8, 1.2, 0.5, 1.5)
+0.017104143079738454
+> dbvch(1.0, 1.0, 0.8, 1.2, 0.5, 1.5)
+0.027781452878001867
+> pbvch(1.0, 2.0, 0.8, 1.2, 0.5, 1.5)
+0.8928758007478387
+> sbvch(1.0, 2.0, 0.8, 1.2, 0.5, 1.5)
+4.468139007897446e-13
+> sim = rbvch(400, 0.8, 1.2, 0.5, 1.5, random_state=2024)
+> np.mean(sim[:, 0] == sim[:, 1])
+np.float64(0.2375)
+\end{lstlisting}
+
+\HeaderA{dmarg1 dmarg2 pmarg1 pmarg2}{Marginal Distributions of the Bivariate Chen Law}
+\AliasLine{dmarg1, dmarg2, pmarg1, pmarg2}
+\DocSec{Description}
+Density (\code{dmarg1}, \code{dmarg2}) and
+distribution function (\code{pmarg1}, \code{pmarg2}) of the marginal
+laws $Z_1\sim Ch(\alpha_1+\alpha_3,\beta)$ and
+$Z_2\sim Ch(\alpha_2+\alpha_3,\beta)$.
+\DocSec{Usage}
+\begin{verbatim}
+dmarg1(x, alpha1, alpha2, alpha3, beta, log=False)
+dmarg2(y, alpha1, alpha2, alpha3, beta, log=False)
+pmarg1(q, alpha1, alpha2, alpha3, beta)
+pmarg2(q, alpha1, alpha2, alpha3, beta)
+\end{verbatim}
+\DocSec{Arguments}
+\begin{description}
+\item[\code{x, q}] non-negative quantiles.
+\item[\code{alpha1, alpha2, alpha3, beta}] parameters of the bivariate law; only the sums $\alpha_1+\alpha_3$ resp.\ $\alpha_2+\alpha_3$ enter.
+\item[\code{log}] bool; return the log-density instead.
+\end{description}
+\DocSec{Details}
+Identical by construction to the univariate Chen
+functions evaluated at the summed scale parameters.
+\DocSec{Value}
+\begin{description}
+\item[\code{dmarg1, dmarg2}] marginal densities.
+\item[\code{pmarg1, pmarg2}] marginal CDFs.
+\end{description}
+
+\vspace{0.8em}\noindent{\bfseries Examples} (live output):
+\begin{lstlisting}
+> from bvchen import dmarg1, dmarg2, pmarg1, pmarg2
+> from bvchen import dchen, pchen
+> dmarg1(1.0, 0.8, 1.2, 0.5, 1.5)
+np.float64(0.5678278402129886)
+> dchen(1.0, 1.3, 1.5)
+np.float64(0.5678278402129886)
+> pmarg2([0.5, 1.0, 2.0], 0.8, 1.2, 0.5, 1.5)
+array([0.51373539, 0.94612448, 1.        ])
+> pchen([0.5, 1.0, 2.0], 1.7, 1.5)
+array([0.51373539, 0.94612448, 1.        ])
+\end{lstlisting}
+
+\HeaderA{dcond1 dcond2 hcond1 hcond2}{Conditional Distributions of the Bivariate Chen Law}
+\AliasLine{dcond1, dcond2, hcond1, hcond2}
+\DocSec{Description}
+Conditional density of $Z_1$ given $Z_2=y$
+(\code{dcond1}; suffix \code{2} symmetrically for $Z_2$ given
+$Z_1=x$) and conditional hazard of the absolutely continuous part
+(\code{hcond1}, \code{hcond2}). The conditional law carries an atom
+at $z_i=y$ whose mass is exposed through the attribute
+\code{atom}.
+\DocSec{Usage}
+\begin{verbatim}
+dcond1(z1, y, alpha1, alpha2, alpha3, beta)
+dcond2(z2, x, alpha1, alpha2, alpha3, beta)
+hcond1(z1, y, alpha1, alpha2, alpha3, beta)
+hcond2(z2, x, alpha1, alpha2, alpha3, beta)
+\end{verbatim}
+\DocSec{Arguments}
+\begin{description}
+\item[\code{z1, z2}] values at which the conditional density/hazard of the response variable is evaluated.
+\item[\code{y, x}] conditioning values; must be positive.
+\item[\code{alpha1, alpha2, alpha3, beta}] parameters (all positive).
+\end{description}
+\DocSec{Details}
+For $z_1<y$ the conditional density equals
+$f_{Ch(\alpha_1)}(z_1)$, independent of $y$; for $z_1>y$ it equals
+\linebreak
+$f_{Ch(\alpha_2)}(y)\,f_{Ch(\alpha_1+\alpha_3)}(z_1)/
+f_{Ch(\alpha_2+\alpha_3)}(y)$. The atom at $z_1=y$ has mass
+$g(y)/f_{Ch(\alpha_2+\alpha_3)}(y)$. The conditional hazard is
+\code{NaN} exactly at $z_i=y$, where only the point mass lives.
+\DocSec{Value}
+\begin{description}
+\item[\code{dcond1, dcond2}] ndarray subclass carrying the attribute \code{atom} (point mass at the conditioning value).
+\item[\code{hcond1, hcond2}] conditional hazard rates.
+\end{description}
+
+\vspace{0.8em}\noindent{\bfseries Examples} (live output):
+\begin{lstlisting}
+> from bvchen import dcond1, hcond1
+> dc = dcond1([0.4, 0.9, 1.2], y=1.0,
+>             alpha1=1, alpha2=1, alpha3=1, beta=1.5)
+> dc
+_CondResult([0.91616535, 0.86763014, 0.14710767])
+> dc.atom
+0.08968703936700859
+> hcond1([0.5, 1.0, 1.5], y=1.0,
+>        alpha1=1, alpha2=1, alpha3=1, beta=1.5)
+array([ 1.51050632,         nan, 20.55971011])
+\end{lstlisting}
+
+\HeaderA{survcop kendall\_tau}{Dependence Measures of the Bivariate Chen Law}
+\AliasLine{survcop, kendall\_tau}
+\DocSec{Description}
+Survival copula $\hat C(u,v)$ (\code{survcop})
+and Monte-Carlo Kendall's $\tau$ (\code{kendall\_tau}, computed as
+$\tau = 4E[F(Z_1,Z_2)]-1$). Dependence increases with the relative
+size of the common-shock parameter $\alpha_3$ and does not depend on
+$\beta$.
+\DocSec{Usage}
+\begin{verbatim}
+survcop(u, v, alpha1, alpha2, alpha3)
+
+kendall_tau(alpha1, alpha2, alpha3, beta,
+            n=50000, random_state=None)
+\end{verbatim}
+\DocSec{Arguments}
+\begin{description}
+\item[\code{u, v}] marginal survival levels in $[0,1]$.
+\item[\code{alpha1, alpha2, alpha3}] positive shape parameters.
+\item[\code{beta}] power parameter (no influence on tau).
+\item[\code{n}] int; number of Monte-Carlo draws.
+\item[\code{random\_state}] seed or Generator for reproducibility.
+\end{description}
+\DocSec{Value}
+\begin{description}
+\item[\code{survcop}] $\hat C(u,v)=\min\{v\,u^{\alpha_1/(\alpha_1+\alpha_3)},\; u\,v^{\alpha_2/(\alpha_2+\alpha_3)}\}$.
+\item[\code{kendall\_tau}] float estimate of Kendall's tau.
+\end{description}
+
+\vspace{0.8em}\noindent{\bfseries Examples} (live output):
+\begin{lstlisting}
+> from bvchen import survcop, kendall_tau
+> survcop([0.5, 0.8], [0.5, 0.8], alpha1=1, alpha2=1, alpha3=1)
+array([0.35355339, 0.71554175])
+> survcop(0, 0.5, 1, 1, 1)
+np.float64(0.0)
+> kendall_tau(1, 1, 0.05, 1.5, n=20000, random_state=9)
+0.03132131771194446
+> kendall_tau(1, 1, 10.0, 1.5, n=20000, random_state=9)
+0.8350319355417934
+\end{lstlisting}
+
+\HeaderA{bvch\_moment}{Moments of the Bivariate Chen Distribution}
+\AliasLine{bvch\_moment; class methods BvChen.moment, .mean, .var, .cov, .min\_dist}
+\DocSec{Description}
+Raw joint moment $E[Z_1^r Z_2^s]$
+(\code{bvch\_moment}). Following Proposition~4 of the paper, the
+moment splits into integrals over $\{z_1<z_2\}$, $\{z_1>z_2\}$ and the
+diagonal, all evaluated on the stable exponential scale
+$t=e^{z^\beta}-1$ where $f_{Ch(\alpha)}(z)\,dz
+=\alpha e^{-\alpha t}dt$. The frozen class offers \code{.moment},
+\code{.mean}, \code{.var}, \code{.cov} and
+\code{.min\_dist}.
+\DocSec{Usage}
+\begin{verbatim}
+bvch_moment(r, s, alpha1, alpha2, alpha3, beta, tol=1e-08)
+
+BvChen(r=...).moment(r, s)      # frozen-class equivalents
+BvChen(...).mean()              # (E[Z1], E[Z2])
+BvChen(...).var()               # variances
+BvChen(...).cov()               # 2x2 covariance matrix
+BvChen(...).min_dist()          # min(Z1, Z2) ~ Ch(a1+a2+a3, beta)
+\end{verbatim}
+\DocSec{Arguments}
+\begin{description}
+\item[\code{r, s}] non-negative orders of $Z_1$ and $Z_2$.
+\item[\code{alpha1, alpha2, alpha3, beta}] parameters (all positive).
+\item[\code{tol}] absolute/relative tolerance for the quadratures.
+\end{description}
+\DocSec{Details}
+With $r=s=0$ the function returns one and reproduces
+the mixture masses: $P(Z_1<Z_2)=\alpha_1/A$,
+$P(Z_1>Z_2)=\alpha_2/A$, $P(Z_1=Z_2)=\alpha_3/A$,
+$A=\alpha_1+\alpha_2+\alpha_3$.
+\DocSec{Value}
+\begin{description}
+\item[\code{bvch\_moment}] float, $E[Z_1^r Z_2^s]$.
+\item[\code{min\_dist}] dict with keys \code{alpha}, \code{beta} and callables \code{d}, \code{p}, \code{q}.
+\end{description}
+
+\vspace{0.8em}\noindent{\bfseries Examples} (live output):
+\begin{lstlisting}
+> from bvchen import bvch_moment, BvChen
+> m00 = bvch_moment(0, 0, 0.8, 1.2, 0.5, 1.5)
+> round(m00, 12)
+1.0
+> dist = BvChen(0.8, 1.2, 0.5, 1.5)
+> dist.mean()
+array([0.58621265, 0.5122697 ])
+> dist.cov()
+array([[0.09659755, 0.02272164],
+       [0.02272164, 0.07923764]])
+> dist.min_dist()["p"](1.0)
+np.float64(0.9863730328537466)
+\end{lstlisting}
+
+\HeaderA{loglik\_bvch profile\_beta}{Log-Likelihood and Profile Likelihood of the Bivariate Chen Model}
+\AliasLine{loglik\_bvch, profile\_beta}
+\DocSec{Description}
+Observed-data log-likelihood
+(\code{loglik\_bvch}) and profile likelihood over the power parameter
+$\beta$ (\code{profile\_beta}); at each grid point the three
+$\alpha$'s are re-maximised with warm starts guarded by cold
+restarts.
+\DocSec{Usage}
+\begin{verbatim}
+loglik_bvch(z1, z2, alpha1, alpha2, alpha3, beta)
+
+profile_beta(z1, z2, betas=None, start=None)
+\end{verbatim}
+\DocSec{Arguments}
+\begin{description}
+\item[\code{z1, z2}] numeric arrays of paired observations.
+\item[\code{alpha1, alpha2, alpha3, beta}] parameters (all positive).
+\item[\code{betas}] optional candidate grid; default is a 25-point log-spaced grid over $(0.05, 20)$.
+\item[\code{start}] optional length-3 start vector for the alphas.
+\end{description}
+\DocSec{Details}
+Ties $z_{1i}=z_{2i}$ contribute the log of the
+singular diagonal density; off-diagonal points contribute the sum of
+two Chen log-densities with summed scale parameters.
+\DocSec{Value}
+\begin{description}
+\item[\code{loglik\_bvch}] float, the observed log-likelihood.
+\item[\code{profile\_beta}] dict with keys \code{grid} (arrays of beta values and profile log-likelihoods) and \code{beta\_hat}.
+\end{description}
+
+\vspace{0.8em}\noindent{\bfseries Examples} (live output):
+\begin{lstlisting}
+> from bvchen import rbvch, loglik_bvch, profile_beta
+> sim = rbvch(300, 1, 1, 1, 1.5, random_state=7)
+> loglik_bvch(sim[:, 0], sim[:, 1], 1, 1, 1, 1.5)
+-192.00632359211596
+> pb = profile_beta(sim[:, 0], sim[:, 1],
+>                   betas=np.linspace(0.8, 2.4, 9))
+> round(pb["beta_hat"], 3)
+1.514
+\end{lstlisting}
+
+\HeaderA{fit\_bvchen BvChenFit}{EM Estimation of the Bivariate Chen Distribution}
+\AliasLine{fit\_bvchen, BvChenFit, BvChenFit.coefficients}
+\DocSec{Description}
+Fits the four-parameter bivariate Chen law
+$(\alpha_1,\alpha_2,\alpha_3,\beta)$ to paired data with the EM
+algorithm. Each iteration re-estimates the $\alpha$'s at the current
+$\beta$ (numerical M-step) and then updates $\beta$ by
+one-dimensional maximisation of the observed log-likelihood. An
+observed tie $z_{1i}=z_{2i}$ identifies the common-shock component
+exactly.
+\DocSec{Usage}
+\begin{verbatim}
+fit_bvchen(z1, z2, start=None, tol=1e-08,
+           maxit=200, verbose=False)
+\end{verbatim}
+\DocSec{Arguments}
+\begin{description}
+\item[\code{z1, z2}] paired non-negative observations.
+\item[\code{start}] optional dict or sequence with starting values; defaults are derived from univariate marginal fits.
+\item[\code{tol}] relative tolerance on the log-likelihood increase.
+\item[\code{maxit}] maximum number of EM iterations.
+\item[\code{verbose}] bool; print the iteration history.
+\end{description}
+\DocSec{Details}
+Returns a \code{BvChenFit} object whose fields include
+\code{coefficients} $(\alpha_1,\alpha_2,\alpha_3,\beta)$,
+\code{loglik}, \code{iterations}, \code{converged}, a Monte-Carlo
+Kendall's \code{tau}, the sample size \code{n}, the number of ties
+\code{n\_ties} and the iteration \code{history}. The estimator is
+invariant to its starting values.
+\DocSec{Value}
+\begin{description}
+\item[\code{fit\_bvchen}] a fitted \code{BvChenFit} instance.
+\end{description}
+\DocSec{References}
+Kundu, D., Dey, A.~K. (2009). Estimating the
+parameters of the Marshall--Olkin bivariate Weibull distribution by EM
+algorithm. \emph{Comput.\ Stat.\ Data Anal.}\ 53, 956--965.
+
+\vspace{0.8em}\noindent{\bfseries Examples} (live output):
+\begin{lstlisting}
+> from bvchen import rbvch, fit_bvchen
+> sim = rbvch(400, 0.8, 1.2, 0.5, 1.5, random_state=2024)
+> fit = fit_bvchen(sim[:, 0], sim[:, 1])
+> fit.coefficients.round(3)
+array([0.787, 1.125, 0.616, 1.458])
+> (fit.converged, fit.iterations)
+(True, 4)
+> round(fit.tau, 4)
+0.2468
+> print(fit)
+BvChenFit(alpha1=0.786514, alpha2=1.12515, alpha3=0.615747, beta=1.45798, loglik=-306.3466, converged=True, iterations=4)
+\end{lstlisting}
+
+\HeaderA{gof qqplot}{Goodness-of-Fit Tests and Q-Q Diagnostics}
+\AliasLine{gof, qqplot}
+\DocSec{Description}
+Kolmogorov-Smirnov goodness-of-fit tests for the
+two marginals and for the minimum $\min(Z_1,Z_2)$, following the
+testing strategy of Meintanis (2007), together with theoretical Q-Q
+panels against their Chen quantiles.
+\DocSec{Usage}
+\begin{verbatim}
+gof(z1, z2, alpha1, alpha2, alpha3, beta)
+
+qqplot(z1, z2, alpha1, alpha2, alpha3, beta, ax=None)
+\end{verbatim}
+\DocSec{Arguments}
+\begin{description}
+\item[\code{z1, z2}] paired non-negative observations.
+\item[\code{alpha1, alpha2, alpha3, beta}] fitted parameter values.
+\item[\code{ax}] optional matplotlib axes (three panels).
+\end{description}
+\DocSec{Details}
+\code{gof} returns three scipy Kstest results under
+the keys \code{"ks\_z1"}, \code{"ks\_z2"} and
+\code{"ks\_min"}. \code{qqplot} draws sample versus theoretical
+quantiles for $Z_1$, $Z_2$ and the minimum.
+\DocSec{Value}
+\begin{description}
+\item[\code{gof}] dict of KstestResult objects.
+\item[\code{qqplot}] array of matplotlib Axes.
+\end{description}
+\DocSec{References}
+Meintanis, S.~G. (2007). Test of fit for
+Marshall--Olkin distributions with applications.
+\emph{J.~Statist.~Comput.~Simul.}\ 77, 171--179.
+
+\vspace{0.8em}\noindent{\bfseries Examples} (live output):
+\begin{lstlisting}
+> from bvchen import rbvch, gof, qqplot
+> sim = rbvch(400, 1, 1, 1, 1.5, random_state=5)
+> g = gof(sim[:, 0], sim[:, 1], 1, 1, 1, 1.5)
+> [(k, round(v.pvalue, 3)) for k, v in g.items()]
+[('ks_z1', np.float64(0.191)), ('ks_z2', np.float64(0.357)), ('ks_min', np.float64(0.091))]
+> ax = qqplot(sim[:, 0], sim[:, 1], 1, 1, 1, 1.5)
+> ax[0].figure.savefig("fig-qq.png", dpi=110)
+> "figure written to fig-qq.png"
+'figure written to fig-qq.png'
+\end{lstlisting}
+
+\HeaderA{surface\_plot contour\_plot}{Plots for the Bivariate Chen Distribution}
+\AliasLine{surface\_plot, contour\_plot}
+\DocSec{Description}
+Perspective surface and contour plot of the
+(log) absolutely continuous part of the joint density on a grid,
+reproducing Fig.~1 of the paper.
+\DocSec{Usage}
+\begin{verbatim}
+surface_plot(alpha1, alpha2, alpha3, beta, xmax=3.0,
+             n=120, log=True, ax=None)
+
+contour_plot(alpha1, alpha2, alpha3, beta, xmax=3.0,
+             n=120, log=True, levels=12, ax=None)
+\end{verbatim}
+\DocSec{Arguments}
+\begin{description}
+\item[\code{alpha1, alpha2, alpha3, beta}] parameters (all positive).
+\item[\code{xmax}] upper limit of both axes.
+\item[\code{n}] grid size per axis.
+\item[\code{log}] bool; plot $\log f$ instead of $f$.
+\item[\code{levels}] number of contour levels.
+\item[\code{ax}] optional matplotlib axes.
+\end{description}
+\DocSec{Details}
+The diagonal carries the singular component; the
+plotted surface shows only the absolutely continuous part
+(\code{component="ac"}). Requires the optional dependency matplotlib
+(\code{pip install bvchen[plot]}).
+\DocSec{Value}
+\begin{description}
+\item[\code{surface\_plot}] matplotlib 3-D axes object.
+\item[\code{contour\_plot}] matplotlib axes object.
+\end{description}
+
+\vspace{0.8em}\noindent{\bfseries Examples} (live output):
+\begin{lstlisting}
+> from bvchen.plotting import surface_plot, contour_plot
+> ax = surface_plot(1.5, 2.5, 0.5, 0.8, xmax=2.0, n=80)
+> ax.figure.savefig("fig-surface.png", dpi=110)
+> axc = contour_plot(1.5, 2.5, 0.5, 0.8, xmax=2.0, n=80)
+> axc.figure.savefig("fig-contour.png", dpi=110)
+> "figures written to fig-surface.png and fig-contour.png"
+'figures written to fig-surface.png and fig-contour.png'
+\end{lstlisting}
+
+
+\vspace{0.8em}
+\noindent{\bfseries Resulting figures:}
+\begin{center}
+\includegraphics[width=0.98\textwidth]{fig-qq.png}
+
+\vspace{0.6em}
+\includegraphics[width=0.495\textwidth]{fig-surface.png}\hfill
+\includegraphics[width=0.495\textwidth]{fig-contour.png}
+\end{center}
+
+\newpage
+\HeaderA{BvChen}{The Frozen Bivariate Chen Distribution Object}
+\AliasLine{bvchen.BvChen}
+\DocSec{Description}
+A frozen distribution holding fixed parameters
+$(\alpha_1,\alpha_2,\alpha_3,\beta)$ and exposing every quantity of
+the law as a method: \code{pdf}/\code{logpdf}, \code{cdf},
+\code{sf}, \code{rvs}, marginal densities/CDFs, conditional
+densities/hazards, \code{copula}, \code{kendall\_tau},
+\code{moment}/\code{mean}/\code{var}/\code{cov} and
+\code{min\_dist}.
+\DocSec{Usage}
+\begin{verbatim}
+from bvchen import BvChen
+
+dist = BvChen(alpha1, alpha2, alpha3, beta)
+dist.pdf(x, y, log=False, component="full")
+dist.cdf(x, y); dist.sf(x, y)
+dist.rvs(n=1, random_state=None)
+dist.marginal1_pdf(x); dist.marginal2_cdf(q)
+dist.conditional1_pdf(z1, y); dist.conditional2_hazard(z2, x)
+dist.copula(u, v); dist.kendall_tau(n=50000, random_state=None)
+dist.mean(); dist.var(); dist.cov(); dist.min_dist()
+\end{verbatim}
+\DocSec{Arguments}
+\begin{description}
+\item[\code{alpha1, alpha2, alpha3, beta}] parameters of the BvCh law; all positive. \code{alpha3} is the common-shock parameter driving the diagonal ties.
+\end{description}
+\DocSec{Details}
+Attribute \code{alpha} aliases \code{alpha3};
+attribute \code{params} returns the parameter tuple. The class is a
+thin, stateless wrapper around the module-level functions shown in the
+previous sections.
+\DocSec{Value}
+\begin{description}
+\item[\code{BvChen}] frozen distribution object.
+\end{description}
+
+\vspace{0.8em}\noindent{\bfseries Examples} (live output):
+\begin{lstlisting}
+> import bvchen
+> dist = bvchen.BvChen(alpha1=0.8, alpha2=1.2, alpha3=0.5, beta=1.5)
+> print(dist)
+BvChen(alpha1=0.8, alpha2=1.2, alpha3=0.5, beta=1.5)
+> dist.pdf(0.5, 0.7)
+0.8520743960510928
+> dist.cdf(1.0, 1.5)
+0.8927811110143664
+> dist.sf(1.0, 1.5)
+3.205913914883256e-05
+> sim = dist.rvs(200, random_state=42)
+> sim[:3]
+array([[0.90371321, 0.34129252],
+       [0.36536451, 0.45398971],
+       [0.04675718, 0.84768333]])
+\end{lstlisting}
+
+
+\newpage
+% ======================= REFERENCES ================================
+\section{References}
+\noindent Chen Z (2000) A new two-parameter lifetime distribution with
+bathtub shape or increasing failure rate function. Stat Probab Lett
+49(2):155--161\\[0.35em]
+\noindent Gupta PK, Pundir PS, Sharma VK, Mesfioui M (2022) Bivariate
+extension of bathtub-shaped distribution. Life Cycle Reliab Saf Eng
+11:247--259\\[0.35em]
+\noindent Kundu D, Dey AK (2009) Estimating the parameters of the
+Marshall--Olkin bivariate Weibull distribution by EM algorithm. Comput
+Stat Data Anal 53(4):956--965\\[0.35em]
+\noindent Marshall AW, Olkin I (1967) A multivariate exponential
+distribution. J Am Stat Assoc 62:30--44\\[0.35em]
+\noindent Meintanis SG (2007) Test of fit for Marshall--Olkin
+distributions with applications. J Stat Comput Simul 77:171--179
+
+\end{document}

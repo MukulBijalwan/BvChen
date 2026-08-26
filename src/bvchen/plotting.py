@@ -45,9 +45,9 @@ def surface_plot(alpha1, alpha2, alpha3, beta, xmax=3.0, n=120,
         ax = fig.add_subplot(111, projection="3d")
     surf = ax.plot_surface(X, Y, Z, cmap="viridis", edgecolor="none",
                            alpha=0.95, antialiased=True)
-    ax.set_xlabel("$z_1$")
-    ax.set_ylabel("$z_2$")
-    ax.set_zlabel("$\log f(z_1,z_2)$" if log else "$f(z_1,z_2)$")
+    ax.set_xlabel(r"$z_1$")
+    ax.set_ylabel(r"$z_2$")
+    ax.set_zlabel(r"$\log f(z_1,z_2)$" if log else r"$f(z_1,z_2)$")
     ax.set_title(f"BvCh($\\alpha_1={alpha1:g}, \\alpha_2={alpha2:g}, "
                  f"\\alpha_3={alpha3:g}, \\beta={beta:g}$)")
     ax.figure.colorbar(surf, ax=ax, shrink=0.6)
