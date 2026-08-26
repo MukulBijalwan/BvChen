@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "bvchen"
+name = "BvChenpy"
 version = "0.1.0"
 description = "Bivariate Chen distribution: density, CDF, survival, random generation, marginals, conditionals, moments, survival copula, and EM-based maximum-likelihood estimation."
 readme = "README.md"
@@ -39,9 +39,9 @@ plot = ["matplotlib>=3.5"]
 test = ["pytest>=7.0", "matplotlib>=3.5"]
 
 [project.urls]
-Homepage = "https://github.com/MukulBijalwan/bvchen"
-Documentation = "https://github.com/MukulBijalwan/bvchen#readme"
-"Bug Tracker" = "https://github.com/MukulBijalwan/bvchen/issues"
+Homepage = "https://github.com/MukulBijalwan/BvChenpy"
+Documentation = "https://github.com/MukulBijalwan/BvChenpy#readme"
+"Bug Tracker" = "https://github.com/MukulBijalwan/BvChenpy/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
