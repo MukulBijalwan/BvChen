@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bvchen"
+version = "0.1.0"
+description = "Bivariate Chen distribution: density, CDF, survival, random generation, marginals, conditionals, moments, survival copula, and EM-based maximum-likelihood estimation."
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+authors = [
+    { name = "Mukul Bijalwan", email = "mukulbijalwan555@gmail.com" },
+    { name = "Puneet Kumar Gupta", email = "puneetstat999@gmail.com" },
+]
+keywords = [
+    "bivariate", "Chen distribution", "bathtub hazard", "reliability",
+    "survival analysis", "Marshall-Olkin", "EM algorithm", "statistics",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Statistics",
+]
+dependencies = [
+    "numpy>=1.22",
+    "scipy>=1.8",
+]
+
+[project.optional-dependencies]
+plot = ["matplotlib>=3.5"]
+test = ["pytest>=7.0", "matplotlib>=3.5"]
+
+[project.urls]
+Homepage = "https://github.com/MukulBijalwan/bvchen"
+Documentation = "https://github.com/MukulBijalwan/bvchen#readme"
+"Bug Tracker" = "https://github.com/MukulBijalwan/bvchen/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+bvchen = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
